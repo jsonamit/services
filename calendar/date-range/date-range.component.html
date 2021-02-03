@@ -1,0 +1,36 @@
+
+  <ion-header style="background-color: tomato;color: white;text-align: center;">
+    <ion-title style="padding: 10px;">Select Date</ion-title>
+  </ion-header>
+
+
+  
+  <ion-grid>
+    
+    <ion-row style="padding:  5px;">
+      <ion-col size="9" style="font-size: 17px;"> 
+        {{getStartDateFormat(dateFrom)}}
+      </ion-col>
+      <ion-col size="3">
+        <ion-icon (click)="selectDate('from')" style="color: blue;font-size: 30px;" name="calendar"></ion-icon>
+      </ion-col>
+    </ion-row>
+    <ion-row style="padding: 5px;">
+      <ion-col size="9" style="font-size: 17px;">
+        {{getEndDateFormat(dateTo)}}
+      </ion-col>
+      <ion-col size="3">
+        <ion-icon (click)="selectDate('to')" style="color: blue;font-size: 30px;" name="calendar"></ion-icon>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="6"></ion-col>
+      <ion-col size="3">
+        <ion-icon (click)="dismiss(true)" style="color: blue;font-size: 40px;" name="checkmark-circle"></ion-icon>
+      </ion-col>
+      <ion-col size="3">
+        <ion-icon (click)="dismiss(false)" style="color: red;font-size: 40px;" name="close-circle"></ion-icon>
+      </ion-col>
+
+    </ion-row>
+  </ion-grid>
