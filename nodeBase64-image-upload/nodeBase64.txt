@@ -1,0 +1,38 @@
+import debug from 'debug';
+import rp from 'request-promise';
+import _ from 'lodash';
+
+const moment = require('moment');
+const fs = require('fs');
+const path = require('path');
+
+const filePath = path.normalize(`${__dirname}/../../../`);
+
+const sequelize = require('sequelize');
+
+const { Op } = sequelize;
+const log = debug('logistics/api/shipment.service');
+const { Information } = require('./../../conn/sqldb');
+
+
+export async function create(body: any) {
+  const fname = body.file_name;
+  const base64 = body.file;
+  const extension = fname.split('.').pop();
+  const name = `${moment().format('YYYYMMDDHHmmss')}`;
+  const temporaryFile = `${filePath}/public/${name}.${extension}`;
+  fs.writeFileSync(temporaryFile, base64, 'base64');
+
+  const filename = `${name}.${extension}`;
+
+  const info = await Information
+    .create({
+      title: body.title,
+      category_id: body.cat_id,
+      file: filename,
+      description: body.description,
+    });
+
+  return info;
+}
+

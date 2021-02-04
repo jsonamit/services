@@ -1,0 +1,121 @@
+[WebMethod]
+    //[EnableCors(origins: "http://www.example.com", headers: "*", methods: "*")]
+    public void userSignupxx(string name, string mobile, string email, string password, string userstypes, string pincode, string landmark, string registration_no, string service_type, string adhar_photo, string registration_photo, string self_photo, string adhar_photo_file, string registration_photo_file, string self_photo_file)
+    {
+        try
+        {
+
+            String path = HttpContext.Current.Server.MapPath("~/upload");
+            if (!System.IO.Directory.Exists(path))
+            {
+                System.IO.Directory.CreateDirectory(path);
+            }
+            string imgAdharPath = Path.Combine(path, adhar_photo);
+            byte[] imageBytes = Convert.FromBase64String(adhar_photo_file);
+            File.WriteAllBytes(imgAdharPath, imageBytes);
+
+            string imgRegPath = Path.Combine(path, registration_photo);
+            byte[] imageRegBytes = Convert.FromBase64String(registration_photo_file);
+            File.WriteAllBytes(imgRegPath, imageRegBytes);
+
+            string imgSelfPath = Path.Combine(path, self_photo);
+            byte[] imageSelfBytes = Convert.FromBase64String(self_photo_file);
+            File.WriteAllBytes(imgSelfPath, imageSelfBytes);
+
+
+            ResponseData rdata = new ResponseData();
+            UserData udata = new UserData(email, "", "", "", "");
+            UserData urdata = new UserData(mobile, "", "", "", "", "tempValue");
+            if (!urdata.HasValue)
+            {
+                if (!udata.HasValue)
+                {
+                    udata.Name = name;
+                    udata.Mobile = mobile;
+                    udata.Email = email;
+                    udata.Password = password;
+                    udata.Pincode = pincode;
+                    udata.Landmark = landmark;
+                    udata.UserType = userstypes;
+                    udata.TinNumber = registration_no;
+                    udata.AdharPhoto = adhar_photo;
+                    udata.RegPhoto = registration_photo;
+                    udata.SelfPhoto = self_photo;
+                    udata.CategoryVisibility = service_type;
+
+                    if (userstypes == "User")
+                    {
+                        udata.Status = 1;
+                        udata.SaveNormalUser();
+                        // wholesalersms(name, mobile, password);
+                        //adminsms(name, mobile);
+
+                    }
+                    else
+                    {
+                        udata.Status = 0;
+                        udata.SaveNormalUser();
+                        Providersms(name, mobile, password);
+
+                    }
+
+                    DataSet dsuid = udata.getUsers("select max(id) as uid from users");
+                    UserData usdata = new UserData();
+                    DataSet udetail = usdata.getUsers("select * from users where id=" + int.Parse(dsuid.Tables[0].Rows[0]["uid"].ToString()));
+                    usdata.Id = int.Parse(udetail.Tables[0].Rows[0]["id"].ToString());
+                    usdata.Name = udetail.Tables[0].Rows[0]["name"].ToString();
+                    usdata.Mobile = udetail.Tables[0].Rows[0]["mobile"].ToString();
+                    usdata.Email = udetail.Tables[0].Rows[0]["email"].ToString();
+                    usdata.Password = udetail.Tables[0].Rows[0]["epassword"].ToString();
+                    usdata.Pincode = udetail.Tables[0].Rows[0]["pincode"].ToString();
+                    usdata.Landmark = udetail.Tables[0].Rows[0]["landmark"].ToString();
+                    usdata.UserType = udetail.Tables[0].Rows[0]["usertype"].ToString();
+                    usdata.Status = int.Parse(udetail.Tables[0].Rows[0]["status"].ToString());
+                    usdata.TinNumber = udetail.Tables[0].Rows[0]["tinnumber"].ToString();
+                    usdata.CategoryVisibility = udetail.Tables[0].Rows[0]["caregory_visible"].ToString();
+                    usdata.AdharPhoto = udetail.Tables[0].Rows[0]["adharphoto"].ToString();
+                    usdata.SelfPhoto = udetail.Tables[0].Rows[0]["selfphoto"].ToString();
+                    usdata.RegPhoto = udetail.Tables[0].Rows[0]["regphoto"].ToString();
+                    rdata.Message = "Success";
+                    rdata.Description = "User SuccessFully Registred";
+                    rdata.Data = usdata;
+
+
+                    //AddressData addressData = new AddressData();
+                    //addressData.CustomerId = int.Parse(udetail.Tables[0].Rows[0]["id"].ToString());
+                    //addressData.Landmark = udetail.Tables[0].Rows[0]["landmark"].ToString();
+                    //addressData.Pincode = udetail.Tables[0].Rows[0]["pincode"].ToString();
+                    //addressData.City = udetail.Tables[0].Rows[0]["city"].ToString();
+                    //addressData.State = udetail.Tables[0].Rows[0]["state"].ToString();
+                    //addressData.FlatNo = udetail.Tables[0].Rows[0]["houseno"].ToString();
+                    //addressData.Building = udetail.Tables[0].Rows[0]["building"].ToString();
+                    //addressData.Colony = udetail.Tables[0].Rows[0]["colony"].ToString();
+                    //addressData.IsPrimary = true;
+                    //addressData.Save();
+                }
+                else
+                {
+                    rdata.Message = "Email Found";
+                    rdata.Description = "Email Number Already Exist";
+                }
+            }
+            else
+            {
+                rdata.Message = "Mobile Found";
+                rdata.Description = "Mobile Already Exist";
+            }
+
+            JavaScriptSerializer js = new JavaScriptSerializer();
+            string str = js.Serialize(rdata);
+            Context.Response.Clear();
+            Context.Response.ContentType = "application/json";
+            Context.Response.AddHeader("content-length", str.Length.ToString());
+            Context.Response.Flush();
+            Context.Response.Write(str);
+        }
+        catch (Exception ex)
+        {
+
+        }
+
+    }
