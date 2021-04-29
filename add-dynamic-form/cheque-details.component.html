@@ -1,0 +1,777 @@
+<div>
+
+  <div class="text-right mt-4 mb-2" style="margin-right: 13px;">
+    <button
+      type="button"
+      (click)="OpenModel()"
+      style="background-color: #28a745;color: #FFFFFF;font-size: 12px;"
+      mat-raised-button
+      color="primary"
+      [class.spinner]="loading"
+    >
+      Add Cheque Detail
+    </button>
+  </div>
+
+  <div
+    class="modal fade in"
+    id="kycModel"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="myModalLabel"
+    data-backdrop="false"
+    style="background-color: rgba(0, 0, 0, 0.5);"
+  >
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header" style="padding: 10px;">
+          <h6 class="modal-title" id="myModalLabel" name="myModalLabel">
+            Cheque Details
+          </h6>
+          <button
+            type="button"
+            (click)="onCloseKYC()"
+            class="close"
+            data-dismiss="modal"
+            aria-label="Close"
+          >
+            <span aria-hidden="true">
+              <i class="far text-black fa-times-circle"></i>
+            </span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="tab row m-0" style="width: 100%;">
+            <div
+              style=" border: 1px solid #ddd;"
+              class="m-0 col-md-4 pt-2 pb-2 align-items-center justify-content-center bdr"
+              (click)="changeRDTab('SPDC')" [hidden]="!IsSPDC"
+              [ngClass]="{'active':tab=='SPDC'}"
+            >
+              SPDC
+            </div>
+            <div
+              style=" border: 1px solid #ddd;"
+              class="m-0 col-md-4 pt-2 pb-2 align-items-center justify-content-center bdr"
+              (click)="changeRDTab('RPDC')" [hidden]="!IsRPDC"
+              [ngClass]="{'active':tab=='RPDC'}"
+            >
+              RPDC
+            </div>
+            <div
+              style=" border: 1px solid #ddd;" [hidden]="!IsNACH"
+              class="m-0 col-md-4 pt-2 pb-2 align-items-center justify-content-center bdr"
+              (click)="changeRDTab('NACH')"
+              [ngClass]="{'active':tab=='NACH'}"
+            >
+              NACH
+            </div>
+          </div>
+
+          <ng-container *ngIf="tab=='SPDC'">
+            <form #spdc [formGroup]="PdcRpdcForm">
+              <ng-container formArrayName="items">
+                <ng-container
+                  *ngFor="let item of PdcRpdcForm.get('items')['controls']; let i = index;"
+                  [formGroupName]="i"
+                >
+                  <div class="row mt-3">
+                    <div class="col-md-2" style="display: none;">
+                      <select
+                        name="RepaymentMode"
+                        id="RepaymentMode"
+                        formControlName="PdcType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Pdc Type </option>
+                        <option value="SPDC"> SPDC </option>
+                        <option value="RPDC"> RPDC </option>
+                        <option value="NACH"> NACH </option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <select name="SelectCustomer"
+                              placeholder="Select Customer Name"
+                              id="SelectCustomer" formControlName="CustomerName"
+                              class="form-control input-text-css">
+                        <option value=""> Select Customer </option>
+                        <option *ngFor="let customer of CustomerList"
+                                [value]="customer.CustomerId">
+                          {{customer.Customer}}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Bankname"
+                        placeholder="Bank Name"
+                        name="Bankname"
+                        id="Bankname"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Branch"
+                        placeholder="Branch"
+                        name="Branch"
+                        id="Branch"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <select
+                        name="AccType"
+                        id="AccType"
+                        formControlName="AccType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Acc Type </option>
+                        <option value="SPDC"> SB </option>
+                        <option value="RPDC"> CC </option>
+                        <option value="NACH"> OD </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Ac"
+                        placeholder="A/C No"
+                        name="Ac"
+                        id="Ac"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-md-2">
+                      <input
+                        (change)="calculateNoOfCheque($event,i)"
+                        required
+                        type="number"
+                        formControlName="ChFrom"
+                        placeholder="Ch. No From"
+                        name="ChFrom"
+                        id="ChFrom{{i}}"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+
+                    <div class="col-md-2">
+                      <input
+                        (change)="calculateNoOfCheque($event,i)"
+                        required
+                        type="number"
+                        formControlName="ChTo"
+                        placeholder="Ch. No To"
+                        name="ChTo"
+                        id="ChTo{{i}}"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <input
+                        required
+                        type="text"
+                        formControlName="NoOfChqs"
+                        placeholder="No of Chqs"
+                        name="NoOfChqs"
+                        id="NoOfChqs{{i}}"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                    <div class="col-md-2">
+                      <button
+                        (click)="addItem()"
+                        class="addNewPdc"
+                        data-placement="left"
+                        data-toggle="tooltip"
+                        title="ADD PDC Detail" [hidden]="!IsSaveButton"
+                        type="button"
+                      >
+                        +
+                      </button>
+                      <button
+                        (click)="removeNewPdc(i)"
+                        style="background-color: #ff0000bd; "
+                        class="addNewPdc"
+                        data-placement="left"
+                        data-toggle="tooltip" [hidden]="!IsSaveButton"
+                        type="button"
+                      >
+                        x
+                      </button>
+                    </div>
+                  </div>
+                </ng-container>
+                <div class="row mt-3">
+                  <button type="button"
+                          (click)="SaveSPDC()" [hidden]="!IsSaveButton" [disabled]="!spdc.valid"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px"
+                          mat-raised-button
+                          color="primary">
+                    SAVE
+                  </button>
+                  <button type="button"
+                          (click)="UpdateChequeDetail()" [hidden]="!IsUpdateButton"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px"
+                          mat-raised-button
+                          color="primary">
+                    Update
+                  </button>
+                </div>
+              </ng-container>
+            </form>
+          </ng-container>
+
+          <ng-container *ngIf="tab=='RPDC'">
+            <form #rpdc [formGroup]="RpdcForm">
+              <ng-container formArrayName="items">
+                <ng-container
+                  *ngFor="let item of RpdcForm.get('items')['controls']; let i = index;"
+                  [formGroupName]="i"
+                >
+                  <div class="row mt-3">
+                    <div class="col-md-2" style="display: none;">
+                      <select
+                        name="RepaymentMode"
+                        id="RepaymentMode"
+                        formControlName="PdcType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Pdc Type </option>
+                        <option value="SPDC"> SPDC </option>
+                        <option value="RPDC"> RPDC </option>
+                        <option value="NACH"> NACH </option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <select name="SelectCustomer"
+                              placeholder="Select Customer Name"
+                              id="SelectCustomer" formControlName="CustomerName"
+                              class="form-control input-text-css">
+                        <option value=""> Select Customer </option>
+                        <option *ngFor="let customer of CustomerList"
+                                [value]="customer.CustomerId">
+                          {{customer.Customer}}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Bankname"
+                        placeholder="Bank Name"
+                        name="Bankname"
+                        id="Bankname"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Branch"
+                        placeholder="Branch"
+                        name="Branch"
+                        id="Branch"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <select
+                        name="AccType"
+                        id="AccType"
+                        formControlName="AccType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Acc Type </option>
+                        <option value="SPDC"> SB </option>
+                        <option value="RPDC"> CC </option>
+                        <option value="NACH"> OD </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Ac"
+                        placeholder="A/C No"
+                        name="Ac"
+                        id="Ac"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfChequeR($event,i)"
+                             required
+                             type="number"
+                             formControlName="ChFrom"
+                             placeholder="Ch. No From"
+                             name="ChFrom"
+                             id="ChFromR{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfChequeR($event,i)"
+                             required
+                             type="number"
+                             formControlName="ChTo"
+                             placeholder="Ch. No To"
+                             name="ChTo"
+                             id="ChToR{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+
+                    <div class="col-md-2">
+                      <input required
+                             type="number"
+                             formControlName="NoOfChqs"
+                             placeholder="No of Chqs"
+                             name="NoOfChqs"
+                             id="NoOfChqsR{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfEMIR($event,i)"
+                             required
+                             type="number"
+                             formControlName="EMIFrom"
+                             placeholder="EMI From"
+                             name="EMIFrom"
+                             id="EMIFromR{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfEMIR($event,i)"
+                             required
+                             type="number"
+                             formControlName="EMITo"
+                             placeholder="EMI To"
+                             name="EMITo"
+                             id="EMIToR{{i}}"
+                             class="form-control input-text-css" />
+                      
+                    </div>
+                    <div class="col-md-2">
+                      <button (click)="RPDCaddItem()"
+                              class="addNewPdc"
+                              data-placement="left"
+                              data-toggle="tooltip"
+                              title="ADD PDC Detail" [hidden]="!IsSaveButton"
+                              type="button">
+                        +
+                      </button>
+                      <button (click)="removeRPdc(i)"
+                              style="background-color: #ff0000bd; " [hidden]="!IsSaveButton"
+                              class="addNewPdc"
+                              data-placement="left"
+                              data-toggle="tooltip"
+                              type="button">
+                        x
+                      </button>
+                    </div>
+                  </div>
+                </ng-container>
+                <div class="row mt-3">
+                  <button type="button"
+                          (click)="SaveRPDC()" [disabled]="!rpdc.valid"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px" [hidden]="!IsSaveButton"
+                          mat-raised-button
+                          color="primary"
+                          [class.spinner]="loading">
+                    SAVE
+                  </button>
+                  <button type="button"
+                          (click)="UpdateChequeDetail()" [hidden]="!IsUpdateButton"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px"
+                          mat-raised-button
+                          color="primary">
+                    Update
+                  </button>
+                </div>
+              </ng-container>
+            </form>
+          </ng-container>
+
+          <ng-container *ngIf="tab=='NACH'">
+            <form #nach [formGroup]="NACHForm">
+              <ng-container formArrayName="items">
+                <ng-container
+                  *ngFor="let item of NACHForm.get('items')['controls']; let i = index;"
+                  [formGroupName]="i"
+                >
+                  <div class="row mt-3">
+                    <div class="col-md-2" style="display: none;">
+                      <select
+                        name="RepaymentMode"
+                        id="RepaymentMode"
+                        formControlName="PdcType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Pdc Type </option>
+                        <option value="SPDC"> SPDC </option>
+                        <option value="RPDC"> RPDC </option>
+                        <option value="NACH"> NACH </option>
+                      </select>
+                    </div>
+                    <div class="col-md-2">
+                      <select name="SelectCustomer"
+                              placeholder="Select Customer Name"
+                              id="SelectCustomer" formControlName="CustomerName"
+                              class="form-control input-text-css">
+                        <option value=""> Select Customer </option>
+                        <option *ngFor="let customer of CustomerList"
+                                [value]="customer.CustomerId">
+                          {{customer.Customer}}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Bankname"
+                        placeholder="Bank Name"
+                        name="Bankname"
+                        id="Bankname"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Branch"
+                        placeholder="Branch"
+                        name="Branch"
+                        id="Branch"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <select
+                        name="AccType"
+                        id="AccType"
+                        formControlName="AccType"
+                        class="form-control input-text-css"
+                      >
+                        <option value=""> Select Acc Type </option>
+                        <option value="SPDC"> SB </option>
+                        <option value="RPDC"> CC </option>
+                        <option value="NACH"> OD </option>
+                      </select>
+                    </div>
+
+                    <div class="col-md-2" style="margin-left: -17px;">
+                      <input
+                        required
+                        type="text"
+                        formControlName="Ac"
+                        placeholder="A/C No"
+                        name="Ac"
+                        id="Ac"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfChequeN($event,i)"
+                             required
+                             type="number"
+                             formControlName="ChFrom"
+                             placeholder="Ch. No From"
+                             name="ChFrom"
+                             id="ChFromN{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfChequeN($event,i)"
+                             required
+                             type="number"
+                             formControlName="ChTo"
+                             placeholder="Ch. No To"
+                             name="ChTo"
+                             id="ChToN{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+
+                    <div class="col-md-2">
+                      <input required
+                             type="number"
+                             formControlName="NoOfChqs"
+                             placeholder="No of Chqs"
+                             name="NoOfChqs"
+                             id="NoOfChqsN{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfEMIN($event,i)"
+                             required
+                             type="number"
+                             formControlName="EMIFrom"
+                             placeholder="EMI From"
+                             name="EMIFrom"
+                             id="EMIFromN{{i}}"
+                             class="form-control input-text-css" />
+                    </div>
+                    <div class="col-md-2">
+                      <input (change)="calculateNoOfEMIN($event,i)"
+                             required
+                             type="number"
+                             formControlName="EMITo"
+                             placeholder="EMI To"
+                             name="EMITo"
+                             id="EMIToN{{i}}"
+                             class="form-control input-text-css" />
+
+                    </div>
+                  </div>
+                  <div class="row mt-3">
+                    <div class="col-md-2">
+                      <input
+                        required
+                        type="text"
+                        formControlName="NachCode"
+                        placeholder="Nach Code"
+                        name="NachCode"
+                        id="NachCode"
+                        class="form-control input-text-css"
+                      />
+                    </div>
+
+                    <button
+                      (click)="NachaddItem()"
+                      class="addNewPdc"
+                      data-placement="left"
+                      data-toggle="tooltip"
+                      title="ADD PDC Detail" [hidden]="!IsSaveButton"
+                      type="button"
+                    >
+                      +
+                    </button>
+                    <button
+                      (click)="removeNach(i)"
+                      style="background-color: #ff0000bd; " [hidden]="!IsSaveButton"
+                      class="addNewPdc"
+                      data-placement="left"
+                      data-toggle="tooltip"
+                      type="button"
+                    >
+                      x
+                    </button>
+                  </div>
+                </ng-container>
+                <div class="row mt-3">
+                  <button type="button"
+                          (click)="SaveNACH()" [disabled]="!nach.valid"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px" [hidden]="!IsSaveButton"
+                          mat-raised-button
+                          color="primary"
+                          [class.spinner]="loading">
+                    SAVE
+                  </button>
+                  <button type="button"
+                          (click)="UpdateChequeDetail()" [hidden]="!IsUpdateButton"
+                          style="background-color: #28a745;color: #FFFFFF;font-size: 12px;margin-left: 15px"
+                          mat-raised-button
+                          color="primary">
+                    Update
+                  </button>
+                </div>
+              </ng-container>
+            </form>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4">
+    <div class="col-md-12">
+      <div class="table-responsive ">
+        <mat-table [dataSource]="dataCSource" matSort matTableExporter>
+          <ng-container matColumnDef="Int_Id">
+            <mat-header-cell mat-sort-header class="grid-header" style="max-width:50px" *matHeaderCellDef>
+              #
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row,let i = index" class="grid-cell" style="max-width: 50px;max-height:5px">
+              {{ (paginatorRef.pageIndex * paginatorRef.pageSize) + (i + 1) }}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Pdc Type">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Pdc Type
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.PdcType}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Customer Name">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Customer Name
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.CustomerName}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Bank Name">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Bank Name
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.Bankname}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Branch">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Branch
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.Branch}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Acc Type">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Acc Type
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.AccType}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="A/C No">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              A/C No
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.Ac}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ChFrom">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              ChFrom
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.ChFrom}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="ChTo">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              ChTo
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.ChTo}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="No of Chqs">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              No of Chqs
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.NoOfChqs}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="EMI From">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              EMI From
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.EMIFrom}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="EMI To">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              EMI To
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.EMITo}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Nach Code">
+            <mat-header-cell class="grid-header" *matHeaderCellDef>
+              Nach Code
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row" class="grid-cell">
+              {{row.NachCode}}
+            </mat-cell>
+          </ng-container>
+
+          <ng-container matColumnDef="Action">
+            <mat-header-cell class="grid-header j-c-center"
+                             style="max-height:5px"
+                             *matHeaderCellDef>
+              Action
+            </mat-header-cell>
+            <mat-cell *matCellDef="let row"
+                      class="grid-cell j-c-center"
+                      style="max-width: 150px;max-height:5px">
+              <i class="fa fa-pencil-alt right" (click)="goToUpdate(row)"
+                 style="cursor: pointer;color:green;font-size:16px;"
+                 aria-label="true"></i>
+              <i class="fa fa-minus-circle font-size-15 ml-3" (click)="Delete(row)"
+                 style="color:red;cursor: pointer;"
+                 aria-label="true"></i>
+            </mat-cell>
+          </ng-container>
+          <mat-header-row *matHeaderRowDef="displayedCustomerColumns"></mat-header-row>
+          <mat-row *matRowDef="let row; columns: displayedCustomerColumns"></mat-row>
+        </mat-table>
+
+        <div class="row m-0 align-items-center" style="background: #fff;">
+          <div class="col-md-4">
+          
+          </div>
+          <div class="col-md-8">
+            <mat-paginator #paginatorRef [pageSizeOptions]="[20,50]" showFirstLastButtons> </mat-paginator>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr />
+
+  <div class="text-right mb-2" style="margin-right: 13px;">
+    <button
+      type="button"
+      (click)="saveChequeDetails()"
+      style="background-color: #28a745;color: #FFFFFF;font-size: 12px;"
+      mat-raised-button
+      color="primary"
+      [class.spinner]="loading"
+    >
+      Save
+    </button>
+  </div>
+</div>

@@ -1,0 +1,11 @@
+.tab {
+  .bdr {
+    border: 1px solid #ddd;
+    cursor: pointer;
+    &.active {
+      border: 1px solid #4dc3a3;
+      color: #fff;
+      background: #4dc3a3;
+    }
+  }
+}

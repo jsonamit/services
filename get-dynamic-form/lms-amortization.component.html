@@ -1,0 +1,92 @@
+<!-- <app-mat-spinner-overlay *ngIf="showSpinner"> </app-mat-spinner-overlay> -->
+
+
+<h5 class="fs-12 h-b" style="margin-top: 32px;">Amortization Detail</h5>
+<!-- <div class="row m-0 mt-3"> -->
+
+<div class="row m-0">
+     <div class="col-md-2"><b>Date</b></div>
+     <div class="col-md-2"><b>EMI Amount</b></div>
+     <div class="col-md-1"><b>Principle</b></div>
+     <div class="col-md-1"><b>Interest</b></div>
+     <div class="col-md-2"><b>Outstanding Principle</b></div>
+     <div class="col-md-2"><b style="margin-left: 11px;">Type</b></div>
+     <div class="col-md-1"><b style="margin-left: 16px;">Action</b></div>
+</div>
+
+<form [formGroup]="AmortizationForm"> 
+  <ng-container formArrayName="items">
+     <div class="row ml-0 mt-3" *ngFor="let item of AmortizationForm.get('items')['controls']; let i = index;" [formGroupName]="i">
+
+          <div class="col-md-2">
+               <input name="Date"
+                  id="Date"
+                  value="{{ DueDate | date: 'dd/MM/yyyy' }}"
+                  placeholder="DD/MM/YYYY"
+                  class="form-control input-text-css"
+                  [maxDate]="CurrentDate"
+                  [(bsValue)]="Date"
+                  formControlName="DueDate"
+                  bsDatepicker
+                  [disabled]="FormShow"
+                  />
+            </div>
+            <div class="col-md-2">
+              <input name="EMI Amount"
+                id="EmiAmount"
+                formControlName="EMI_Amount"
+                placeholder="Value"
+                class="form-control input-text-css"
+                [disabled]="FormShow"
+            />
+            </div>
+            <div class="col-md-1">
+              <input name="PRINCIPLE"
+                id="PRINCIPLE"
+                formControlName="PRINCIPLE"
+                placeholder="Value"
+                class="form-control input-text-css"
+                [disabled]="FormShow"
+            />
+            </div>
+            <div class="col-md-1">
+              <input name="INTEREST"
+                id="INTEREST"
+                formControlName="INTEREST"
+                placeholder="Value"
+                class="form-control input-text-css"
+                [disabled]="FormShow"
+            />
+            </div>
+            <div class="col-md-2">
+              <input name="Principle_OS"
+                id="Principle_OS"
+                formControlName="Principle_OS"
+                placeholder="Value"
+                class="form-control input-text-css"
+                [disabled]="FormShow"
+            />
+            </div>
+            <div class="col-md-2">
+              <select [disabled]="FormShow" name="type" id="type" formControlName="type" class="form-control input-text-css" required>
+                    <option value="NACH"> NACH </option>
+                    <option value="PDC"> PDC </option>
+                    <option value="ECS"> ECS </option>
+                    <option value="NON PDC"> NON PDC </option>
+                    <option value="OTHER"> OTHER </option>
+               </select> 
+            </div>
+             <div class="col-md-1">
+                  <button type="button" (click)="editForm(item,i)"
+                      style="background-color: #28a745;color: #FFFFFF;font-size: 12px;" mat-raised-button color="primary"
+                      [class.spinner]="loading">
+                      Edit
+                  </button>
+            </div>
+      </div>
+
+   </ng-container>
+</form>
+
+
+<!-- </div> -->
